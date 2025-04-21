@@ -1,0 +1,27 @@
+{
+  "name": "@tariq-2/flexi-db",
+  "version": "1.0.0",
+  "description": "A lightweight, flexible JSON-based database with caching, async operations, and customizable data storage.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "database",
+    "json",
+    "lightweight",
+    "flexi",
+    "cache",
+    "async"
+  ],
+  "author": "TariQ",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tariq-2/flexi-db.git"
+  },
+  "homepage": "https://github.com/tariq-2/flexi-db#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
