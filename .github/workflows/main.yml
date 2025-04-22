@@ -47,6 +47,7 @@ jobs:
       - name: Send Webhook to Discord (on success)
         if: success()
         run: |
+          echo "Sending Success Webhook..."
           curl -H "Content-Type: application/json" \
           -X POST \
           -d '{
@@ -79,6 +80,7 @@ jobs:
       - name: Send Webhook to Discord (on failure)
         if: failure()
         run: |
+          echo "Sending Failure Webhook..."
           curl -H "Content-Type: application/json" \
           -X POST \
           -d '{
