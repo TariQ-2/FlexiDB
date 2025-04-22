@@ -16,13 +16,13 @@ A lightweight, flexible JSON-based database designed for simplicity and performa
 ## Installation
 
 ```bash
-npm install @tariq-2/flexi-db
+npm install flexi-db
 ```
 
 ## Usage
 
 ```javascript
-const FlexiDB = require('@tariq-2/flexi-db');
+const FlexiDB = require('flexi-db');
 
 // Initialize with custom data directory and options
 const db = new FlexiDB('mydb.json', { dataDir: 'myData', autoBackup: false });
