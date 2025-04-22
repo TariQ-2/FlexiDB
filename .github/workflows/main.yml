@@ -34,56 +34,50 @@ jobs:
           git config --global user.name "TariQ-2"
           git config --global user.email "96053006+TariQ-2@users.noreply.github.com"
 
+      - name: Get Commit ID
+        id: get_commit_id
+        run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
       - name: Send Webhook to Discord (on success)
         if: success()
         run: |
           curl -H "Content-Type: application/json" \
-            -X POST \
-            -d '{
-              "username": "TariQ\"s",
-              "avatar_url": "https://cdn.discordapp.com/avatars/778028400241147915/f373381422a816b4c44926b888cc1a71.png",
-              "embeds": [{
-                "title": "✅ FlexiDB Test Result",
-                "color": 65280,
-                "fields": [
-                  {
-                    "name": "Success",
-                    "value": "FlexiDB is working correctly!",
-                    "inline": true
-                  },
-                  {
-                    "name": "Time (UTC)",
-                    "value": "${{ env.now }}",
-                    "inline": true
-                  }
-                ]
-              }]
-            }' \
-            ${{ secrets.DISCORD_WEBHOOK_URL }}
+          -X POST \
+          -d '{
+            "username": "TariQ\"s",
+            "avatar_url": "https://cdn.discordapp.com/avatars/778028400241147915/f373381422a816b4c44926b888cc1a71.png",
+            "embeds": [{
+              "title": "✅ FlexiDB Test Result",
+              "color": 65280,
+              "fields": [
+                {
+                  "name": "Success",
+                  "value": "FlexiDB is working correctly!",
+                  "inline": true
+                }
+              ]
+            }]
+          }' \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Send Webhook to Discord (on failure)
         if: failure()
         run: |
           curl -H "Content-Type: application/json" \
-            -X POST \
-            -d '{
-              "username": "TariQ\"s",
-              "avatar_url": "https://cdn.discordapp.com/avatars/778028400241147915/f373381422a816b4c44926b888cc1a71.png",
-              "embeds": [{
-                "title": "❌ FlexiDB Test Result",
-                "color": 16711680,
-                "fields": [
-                  {
-                    "name": "Error Message",
-                    "value": "FlexiDB test failed.",
-                    "inline": true
-                  },
-                  {
-                    "name": "Time (UTC)",
-                    "value": "${{ env.now }}",
-                    "inline": true
-                  }
-                ]
-              }]
-            }' \
-            ${{ secrets.DISCORD_WEBHOOK_URL }}
+          -X POST \
+          -d '{
+            "username": "TariQ\"s",
+            "avatar_url": "https://cdn.discordapp.com/avatars/778028400241147915/f373381422a816b4c44926b888cc1a71.png",
+            "embeds": [{
+              "title": "❌ FlexiDB Test Result",
+              "color": 16711680,
+              "fields": [
+                {
+                  "name": "Error Message",
+                  "value": "FlexiDB test failed.",
+                  "inline": true
+                }
+              ]
+            }]
+          }' \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
