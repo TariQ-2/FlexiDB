@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5  # ⏱️ يوقف التشغيل بعد 5 دقائق لو علّق
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code
@@ -27,7 +27,7 @@ jobs:
 
       - name: Get current UTC time
         id: time
-        run: echo "now=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+        run: echo "now=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
 
       - name: Set up Git config
         run: |
@@ -53,7 +53,7 @@ jobs:
                   },
                   {
                     "name": "Time (UTC)",
-                    "value": "'${{ steps.time.outputs.now }}'",
+                    "value": "${{ env.now }}",
                     "inline": true
                   }
                 ]
@@ -80,7 +80,7 @@ jobs:
                   },
                   {
                     "name": "Time (UTC)",
-                    "value": "'${{ steps.time.outputs.now }}'",
+                    "value": "${{ env.now }}",
                     "inline": true
                   }
                 ]
