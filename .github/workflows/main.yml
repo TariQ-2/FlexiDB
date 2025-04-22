@@ -8,6 +8,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 5  # ⏱️ يوقف التشغيل بعد 5 دقائق لو علّق
 
     steps:
       - name: Checkout code
@@ -24,11 +25,15 @@ jobs:
       - name: Run FlexiDB test
         run: node test.js
 
+      - name: Get current UTC time
+        id: time
+        run: echo "now=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+
       - name: Set up Git config
         run: |
           git config --global user.name "TariQ-2"
           git config --global user.email "96053006+TariQ-2@users.noreply.github.com"
-          
+
       - name: Send Webhook to Discord (on success)
         if: success()
         run: |
@@ -38,12 +43,17 @@ jobs:
               "username": "TariQ\"s",
               "avatar_url": "https://cdn.discordapp.com/avatars/778028400241147915/f373381422a816b4c44926b888cc1a71.png",
               "embeds": [{
-                "title": "FlexiDB Test Result",
+                "title": "✅ FlexiDB Test Result",
                 "color": 65280,
                 "fields": [
                   {
                     "name": "Success",
                     "value": "FlexiDB is working correctly!",
+                    "inline": true
+                  },
+                  {
+                    "name": "Time (UTC)",
+                    "value": "'${{ steps.time.outputs.now }}'",
                     "inline": true
                   }
                 ]
@@ -60,12 +70,17 @@ jobs:
               "username": "TariQ\"s",
               "avatar_url": "https://cdn.discordapp.com/avatars/778028400241147915/f373381422a816b4c44926b888cc1a71.png",
               "embeds": [{
-                "title": "FlexiDB Test Result",
+                "title": "❌ FlexiDB Test Result",
                 "color": 16711680,
                 "fields": [
                   {
                     "name": "Error Message",
                     "value": "FlexiDB test failed.",
+                    "inline": true
+                  },
+                  {
+                    "name": "Time (UTC)",
+                    "value": "'${{ steps.time.outputs.now }}'",
                     "inline": true
                   }
                 ]
