@@ -38,9 +38,9 @@ jobs:
         id: get_commit_id
         run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-      - name: Check Webhook URL (for debugging)
+      - name: Check if Webhook URL exists
         run: |
-          echo "DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}"
+          echo "DISCORD_WEBHOOK_URL is: ${{ secrets.DISCORD_WEBHOOK_URL }}"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
@@ -48,6 +48,10 @@ jobs:
         if: success()
         run: |
           echo "Sending Success Webhook..."
+          if [ -z "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            echo "Webhook URL is missing!"
+            exit 1
+          fi
           curl -H "Content-Type: application/json" \
           -X POST \
           -d '{
@@ -81,6 +85,10 @@ jobs:
         if: failure()
         run: |
           echo "Sending Failure Webhook..."
+          if [ -z "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            echo "Webhook URL is missing!"
+            exit 1
+          fi
           curl -H "Content-Type: application/json" \
           -X POST \
           -d '{
