@@ -1,5 +1,5 @@
 const FlexiDB = require('./index');
-const db = new NexlifyDB();
+const db = new FlexiDB();
 
 (async () => {
   try {
