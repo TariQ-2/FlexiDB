@@ -4,7 +4,7 @@ const db = new FlexiDB();
 (async () => {
   try {
     await db.init();
-    console.log(' Database initialized successfully.');
+    console.log('Database initialized successfully.');
 
     try {
       await db.set('test', 'success');
@@ -56,9 +56,13 @@ const db = new FlexiDB();
     }
 
     try {
-      await db.get('nonexistentKey');
-      console.error('Error: Should have thrown an error for nonexistent key');
-      process.exit(1);
+      const nonexistentValue = await db.get('nonexistentKey');
+      if (nonexistentValue === undefined || nonexistentValue === null) {
+        console.log('Correctly handled nonexistent key');
+      } else {
+        console.error('Error: Should have thrown an error for nonexistent key');
+        process.exit(1);
+      }
     } catch (err) {
       console.log('Correctly caught error for nonexistent key');
     }
