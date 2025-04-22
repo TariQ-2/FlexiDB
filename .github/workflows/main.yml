@@ -38,6 +38,12 @@ jobs:
         id: get_commit_id
         run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
+      - name: Check Webhook URL (for debugging)
+        run: |
+          echo "DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}"
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
       - name: Send Webhook to Discord (on success)
         if: success()
         run: |
@@ -53,6 +59,16 @@ jobs:
                 {
                   "name": "Success",
                   "value": "FlexiDB is working correctly!",
+                  "inline": true
+                },
+                {
+                  "name": "Commit ID",
+                  "value": "${{ env.COMMIT_ID }}",
+                  "inline": true
+                },
+                {
+                  "name": "Time (UTC)",
+                  "value": "${{ env.now }}",
                   "inline": true
                 }
               ]
@@ -75,6 +91,16 @@ jobs:
                 {
                   "name": "Error Message",
                   "value": "FlexiDB test failed.",
+                  "inline": true
+                },
+                {
+                  "name": "Commit ID",
+                  "value": "${{ env.COMMIT_ID }}",
+                  "inline": true
+                },
+                {
+                  "name": "Time (UTC)",
+                  "value": "${{ env.now }}",
                   "inline": true
                 }
               ]
