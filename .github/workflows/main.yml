@@ -69,12 +69,7 @@ jobs:
                 {
                   "name": "Commit ID",
                   "value": "${{ env.COMMIT_ID }}",
-                  "inline": true
-                },
-                {
-                  "name": "Time (UTC)",
-                  "value": "${{ env.now }}",
-                  "inline": true
+                  "inline": false
                 }
               ]
             }]
@@ -106,11 +101,6 @@ jobs:
                 {
                   "name": "Commit ID",
                   "value": "${{ env.COMMIT_ID }}",
-                  "inline": true
-                },
-                {
-                  "name": "Time (UTC)",
-                  "value": "${{ env.now }}",
                   "inline": true
                 }
               ]
