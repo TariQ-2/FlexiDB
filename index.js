@@ -18,7 +18,7 @@ class FlexiDB {
     this.filePath = path.join(this.dataDir, fileName); // Path to the database file
     this.cache = new Map(); // In-memory storage for fast access
     this.isDirty = false; // Tracks if data has changed
-    this.autoBackupEnabled = options.autoBackup !== false; // Option to enable/disable auto-backup
+    this.autoBackupEnabled = options.autoBackup !== true; // Option to enable/disable auto-backup
     this.saveDataDebounced = debounce(this.saveData.bind(this), 500); // Delay saving data by 500ms
     if (this.autoBackupEnabled) {
       this.autoBackupInterval = setInterval(() => this.autoBackup(), 60000); // Auto-backup every minute
