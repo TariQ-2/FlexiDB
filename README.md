@@ -26,7 +26,6 @@ const FlexiDB = require('flexi-db');
 
 // Initialize with custom data directory and options
 const db = new FlexiDB('mydb.json', { dataDir: 'myData', autoBackup: false });
-await db.init();
 
 (async () => {
   // Set a value
