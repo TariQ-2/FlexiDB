@@ -18,11 +18,12 @@ class FlexiDB {
     this.filePath = path.join(this.dataDir, fileName); // Path to the database file
     this.cache = new Map(); // In-memory storage for fast access
     this.isDirty = false; // Tracks if data has changed
-    this.autoBackupEnabled = options.autoBackup !== true; // Option to enable/disable auto-backup
+    this.autoBackupEnabled = false; // Option to enable/disable auto-backup
     this.saveDataDebounced = debounce(this.saveData.bind(this), 500); // Delay saving data by 500ms
     if (this.autoBackupEnabled) {
       this.autoBackupInterval = setInterval(() => this.autoBackup(), 60000); // Auto-backup every minute
     }
+    this.ready = this.init(); // Initialize the database automatically
   }
 
   // Initialize the database (must be called before using)
@@ -71,6 +72,7 @@ class FlexiDB {
 
   // Set a key-value pair in the database
   async set(key, value) {
+    await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     this.cache.set(key, value); // Store in cache
     this.isDirty = true; // Mark as changed
@@ -79,19 +81,22 @@ class FlexiDB {
   }
 
   // Get the value for a key
-  get(key) {
+  async get(key) {
+    await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     return this.cache.get(key); // Return value from cache
   }
 
   // Check if a key exists
-  has(key) {
+  async has(key) {
+    await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     return this.cache.has(key); // Return true if key exists
   }
 
   // Delete a key from the database
   async delete(key) {
+    await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     if (!this.cache.has(key)) throw new TypeError('Key does not exist!'); // Check if key exists
     const result = this.cache.delete(key); // Delete from cache
@@ -101,7 +106,8 @@ class FlexiDB {
   }
 
   // Get all key-value pairs (with optional limit)
-  all(limit = 0) {
+  async all(limit = 0) {
+    await this.ready; // Wait for initialization
     const entries = Array.from(this.cache.entries()).map(([key, value]) => ({
       data: key,
       value
@@ -111,6 +117,7 @@ class FlexiDB {
 
   // Add a number to a key's value
   async add(key, value) {
+    await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     if (isNaN(value)) throw new TypeError('Value must be a number!'); // Check for valid number
     const current = Number(this.get(key) || 0); // Convert current value to number (default 0)
@@ -120,6 +127,7 @@ class FlexiDB {
 
   // Subtract a number from a key's value
   async subtract(key, value) {
+    await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     if (isNaN(value)) throw new TypeError('Value must be a number!'); // Check for valid number
     const current = Number(this.get(key) || 0); // Convert current value to number (default 0)
@@ -130,6 +138,7 @@ class FlexiDB {
 
   // Perform a math operation on a key's value
   async math(key, operator, value) {
+    await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     if (!operator) throw new TypeError('Operator is not defined!'); // Check for valid operator
     if (isNaN(value)) throw new TypeError('Value must be a number!'); // Check for valid number
@@ -152,6 +161,7 @@ class FlexiDB {
 
   // Add a value to an array at a key
   async push(key, value) {
+    await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     const current = this.get(key) || []; // Get array or empty array
     if (!Array.isArray(current)) throw new TypeError('Value at key is not an array!'); // Check if array
@@ -161,6 +171,7 @@ class FlexiDB {
 
   // Create a backup of the database
   async backup(fileName) {
+    await this.ready; // Wait for initialization
     if (!fileName) throw new TypeError('Filename is not defined!'); // Check for valid filename
     try {
       const backupPath = path.join(this.dataDir, `${fileName}.json`); // Path for backup file
@@ -181,6 +192,7 @@ class FlexiDB {
 
   // Clear all data in the database
   async reset() {
+    await this.ready; // Wait for initialization
     this.cache.clear(); // Clear cache
     this.isDirty = true; // Mark as changed
     await this.saveDataDebounced(); // Save data after delay
@@ -188,6 +200,7 @@ class FlexiDB {
 
   // Close the database and save data
   async destroy() {
+    await this.ready; // Wait for initialization
     if (this.autoBackupEnabled) {
       clearInterval(this.autoBackupInterval); // Stop auto-backup
     }
@@ -196,6 +209,7 @@ class FlexiDB {
 
   // Run multiple operations as a single transaction
   async transaction(operations) {
+    await this.ready; // Wait for initialization
     const backup = new Map(this.cache); // Backup current cache
     try {
       for (const op of operations) {

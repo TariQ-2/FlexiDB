@@ -1,91 +1,105 @@
 # FlexiDB
 [![GitHub](https://img.shields.io/github/license/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB/blob/master/LICENSE) [![GitHub last commit](https://img.shields.io/github/last-commit/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB/commits/master) [![GitHub issues](https://img.shields.io/github/issues-raw/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB/issues) [![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB/issues) [![GitHub repo size](https://img.shields.io/github/repo-size/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB) [![npm downloads](https://img.shields.io/npm/dt/flexi-db.svg?maxAge=3600)](https://github.com/TariQ-2/FlexiDB) [![npm version](https://img.shields.io/npm/v/flexi-db.svg?maxAge=3600)](https://github.com/TariQ-2/FlexiDB)
 
-A lightweight, flexible JSON-based database designed for simplicity and performance. FlexiDB supports in-memory caching, asynchronous operations, customizable data storage, automatic backups, and atomic transactions.
+**FlexiDB** is a lightweight, flexible JSON-based database for Node.js projects. It offers in-memory caching, async operations, atomic transactions, and zero dependencies.
 
-## Features
+## 🚀 Features
 
-- **High Performance**: In-memory caching and debounced writes for efficient data storage.
-- **Async Support**: Fully asynchronous API with proper initialization.
-- **Flexible Storage**: Store data in a custom directory or the default `FlexiDB` folder.
-- **Automatic Backups**: Optional periodic backups to prevent data loss.
-- **Atomic Transactions**: Execute multiple operations with rollback support.
-- **Type Safety**: Robust input validation with automatic type conversion for numeric operations.
-- **Lightweight**: No external dependencies, built with Node.js core modules.
+* **⚡ High Performance** – In-memory caching and debounced disk writes
+* **🔄 Async API** – All methods are promise-based
+* **💾 Custom Storage** – Use any directory for data and backups
+* **🔁 Auto Backups** – Optional periodic file backups
+* **🔒 Atomic Transactions** – Grouped operations with rollback
+* **🨠 Type Safety** – Auto conversion for numeric operations
+* **🪦 Zero Dependencies** – Uses Node.js core only
 
-## Installation
+## 💾 Installation
 
 ```bash
 npm install flexi-db
 ```
 
-## Usage
+## 🧪 Quick Example
 
-```javascript
+```js
 const FlexiDB = require('flexi-db');
-
-// Initialize with custom data directory and options
-const db = new FlexiDB('mydb.json', { dataDir: 'myData', autoBackup: false });
+const db = new FlexiDB('mydb.json', { dataDir: 'data', autoBackup: true });
 
 (async () => {
-  // Set a value
   await db.set('user1', { name: 'Ali', age: 25 });
-  console.log(db.get('user1')); // { name: 'Ali', age: 25 }
-
-  // Add a number
   await db.add('score', 10);
-  console.log(db.get('score')); // 10
-
-  // Push to an array
   await db.push('items', 'apple');
-  console.log(db.get('items')); // ['apple']
 
-  // Perform a transaction
   await db.transaction([
     { type: 'set', key: 'user2', value: { name: 'Sara' } },
     { type: 'add', key: 'score', value: 5 }
   ]);
 
-  // Get all data
-  console.log(db.all()); // [{ data: 'user1', value: {...}}, ...]
-
-  // Create a backup
-  await db.backup('backup-2025'); // Stored in myData/backup-2025.json
-
-  // Reset database
-  await db.reset();
-
-  // Close database
-  await db.destroy();
+  console.log(db.all());
 })();
 ```
 
-## API
+## 🧩 API Overview
 
-- `init()`: Initialize the database (must be called after constructor).
-- `set(key, value)`: Set a key-value pair.
-- `get(key)`: Get the value for a key.
-- `has(key)`: Check if a key exists.
-- `delete(key)`: Delete a key.
-- `all([limit])`: Get all key-value pairs (optional limit).
-- `add(key, value)`: Add a number to a key (converts non-numeric values to 0).
-- `subtract(key, value)`: Subtract a number from a key.
-- `math(key, operator, value)`: Perform a math operation (+, -, \*, /, %).
-- `push(key, value)`: Push a value to an array at key.
-- `backup(fileName)`: Create a backup file in the specified data directory.
-- `reset()`: Clear all data.
-- `transaction(operations)`: Execute multiple operations atomically.
-- `destroy()`: Save data and stop auto-backups.
+### Core Methods
 
-## Options
+| Method            | Description                              |
+| ----------------- | ---------------------------------------- |
+| `set(key, value)` | Store a value                            |
+| `get(key)`        | Retrieve a value                         |
+| `has(key)`        | Check key existence                      |
+| `delete(key)`     | Remove a key                             |
+| `all(limit?)`     | Get all key-value pairs (optional limit) |
 
-- `dataDir` (string, default: `'FlexiDB'`): Directory to store database and backup files.
-- `autoBackup` (boolean, default: `true`): Enable or disable automatic backups.
+### Math Operations
 
-## Data Storage
+| Method                       | Notes                            |
+| ---------------------------- | -------------------------------- |
+| `add(key, number)`           | Auto-converts non-numbers to 0   |
+| `subtract(key, number)`      | Subtract from number             |
+| `math(key, operator, value)` | Supports `+`, `-`, `*`, `/`, `%` |
 
-Database and backup files are stored in the specified `dataDir` (default: `FlexiDB`) in your project directory, keeping your project organized.
+### Array Utilities
 
-## License
+| Method           | Description                      |
+| ---------------- | -------------------------------- |
+| `push(key, val)` | Push value to array at given key |
 
-MIT License
+### Advanced
+
+| Method               | Description                        |
+| -------------------- | ---------------------------------- |
+| `transaction([...])` | Run multiple operations atomically |
+| `backup(fileName)`   | Create a manual backup             |
+| `reset()`            | Clear all data                     |
+| `destroy()`          | Save data and stop auto-backups    |
+
+## ⚙️ Options
+
+You can pass options in the constructor:
+
+```js
+new FlexiDB('file.json', {
+  dataDir: 'data',      // default: 'FlexiDB'
+  autoBackup: true      // default: false
+});
+```
+
+## 📁 File Structure
+
+All data and backups are stored in the specified `dataDir`, helping you keep your project organized.
+
+```
+my-project/
+  └── data/              # or 'FlexiDB' by default
+      ├── mydb.json
+      └── backup-2025.json
+```
+
+## 📜 License
+
+MIT – Free to use, modify, and distribute.
+
+## 🤝 Contributing
+
+Feel free to open issues or submit PRs. All contributions are welcome!
