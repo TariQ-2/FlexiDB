@@ -3,7 +3,6 @@ const db = new FlexiDB();
 
 (async () => {
   try {
-    await db.init();
     console.log('Database initialized successfully.');
 
     try {
