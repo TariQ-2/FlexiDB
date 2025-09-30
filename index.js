@@ -98,7 +98,7 @@ class FlexiDB {
   async delete(key) {
     await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    if (!this.cache.has(key)) throw new TypeError('Key does not exist!'); // Check if key exists
+    if (!this.cache.has(key)) return false; // Return false if key doesn't exist
     const result = this.cache.delete(key); // Delete from cache
     this.isDirty = true; // Mark as changed
     await this.saveDataDebounced(); // Save data after delay

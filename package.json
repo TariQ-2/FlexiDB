@@ -1,6 +1,6 @@
 {
   "name": "flexi-db",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A lightweight, flexible JSON-based database with caching, async operations, and customizable data storage.",
   "main": "index.js",
   "scripts": {
