@@ -3,23 +3,23 @@
 
 **FlexiDB** is a lightweight, flexible JSON-based database for Node.js projects. It offers in-memory caching, async operations, atomic transactions, and zero dependencies.
 
-## 🚀 Features
+## Features
 
-* **⚡ High Performance** – In-memory caching and debounced disk writes
-* **🔄 Async API** – All methods are promise-based
-* **💾 Custom Storage** – Use any directory for data and backups
-* **🔁 Auto Backups** – Optional periodic file backups
-* **🔒 Atomic Transactions** – Grouped operations with rollback
-* **🨠 Type Safety** – Auto conversion for numeric operations
-* **🪦 Zero Dependencies** – Uses Node.js core only
+* **High Performance** – In-memory caching and debounced disk writes
+* **Async API** – All methods are promise-based
+* **Custom Storage** – Use any directory for data and backups
+* **Auto Backups** – Optional periodic file backups
+* **Atomic Transactions** – Grouped operations with rollback
+* **Type Safety** – Auto conversion for numeric operations
+* **Zero Dependencies** – Uses Node.js core only
 
-## 💾 Installation
+## Installation
 
 ```bash
 npm install flexi-db
 ```
 
-## 🧪 Quick Example
+## Quick Example
 
 ```js
 const FlexiDB = require('flexi-db');
@@ -39,7 +39,7 @@ const db = new FlexiDB('mydb.json', { dataDir: 'data', autoBackup: true });
 })();
 ```
 
-## 🧩 API Overview
+## API Overview
 
 ### Core Methods
 
@@ -74,7 +74,7 @@ const db = new FlexiDB('mydb.json', { dataDir: 'data', autoBackup: true });
 | `reset()`            | Clear all data                     |
 | `destroy()`          | Save data and stop auto-backups    |
 
-## ⚙️ Options
+## Options
 
 You can pass options in the constructor:
 
@@ -85,7 +85,7 @@ new FlexiDB('file.json', {
 });
 ```
 
-## 📁 File Structure
+## File Structure
 
 All data and backups are stored in the specified `dataDir`, helping you keep your project organized.
 
@@ -96,10 +96,10 @@ my-project/
       └── backup-2025.json
 ```
 
-## 📜 License
+## License
 
 MIT – Free to use, modify, and distribute.
 
-## 🤝 Contributing
+## Contributing
 
 Feel free to open issues or submit PRs. All contributions are welcome!

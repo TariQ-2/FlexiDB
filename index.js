@@ -76,13 +76,14 @@ class FlexiDB {
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     this.cache.set(key, value); // Store in cache
     this.isDirty = true; // Mark as changed
-    await this.saveDataDebounced(); // Save data after delay
+    await this.saveData(); // Save data immediately
     return value; // Return the value
   }
 
   // Get the value for a key
   async get(key) {
     await this.ready; // Wait for initialization
+    await this.loadData(); // Ensure data is loaded (if not already) ~_-
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     return this.cache.get(key); // Return value from cache
   }
@@ -90,6 +91,7 @@ class FlexiDB {
   // Check if a key exists
   async has(key) {
     await this.ready; // Wait for initialization
+    await this.loadData(); // Ensure data is loaded (if not already) ~_-
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
     return this.cache.has(key); // Return true if key exists
   }
@@ -101,7 +103,7 @@ class FlexiDB {
     if (!this.cache.has(key)) return false; // Return false if key doesn't exist
     const result = this.cache.delete(key); // Delete from cache
     this.isDirty = true; // Mark as changed
-    await this.saveDataDebounced(); // Save data after delay
+    await this.saveData(); // Save data immediately
     return result; // Return true if deleted
   }
 
@@ -163,7 +165,7 @@ class FlexiDB {
   async push(key, value) {
     await this.ready; // Wait for initialization
     if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    const current = this.get(key) || []; // Get array or empty array
+    const current = await this.get(key) || []; // Get array or empty array
     if (!Array.isArray(current)) throw new TypeError('Value at key is not an array!'); // Check if array
     current.push(value); // Add value to array
     return this.set(key, current); // Save and return array
