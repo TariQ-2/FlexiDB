@@ -1,232 +1,192 @@
-const fs = require('fs').promises; // Use Node.js file system with promises
-const path = require('path'); // Helps with file paths
+const fs = require('fs').promises;
+const path = require('path');
 
-// Debounce function to delay saving data
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout); // Clear any existing timeout
-    timeout = setTimeout(() => func.apply(this, args), wait); // Call function after delay
-  };
-}
-
-// FlexiDB class for managing a JSON-based database
 class FlexiDB {
-  // Constructor to set up the database
   constructor(fileName = 'database.json', options = {}) {
-    this.dataDir = path.resolve(options.dataDir || 'FlexiDB'); // Custom or default folder for data
-    this.filePath = path.join(this.dataDir, fileName); // Path to the database file
-    this.cache = new Map(); // In-memory storage for fast access
-    this.isDirty = false; // Tracks if data has changed
-    this.autoBackupEnabled = false; // Option to enable/disable auto-backup
-    this.saveDataDebounced = debounce(this.saveData.bind(this), 500); // Delay saving data by 500ms
+    this.dataDir = path.resolve(options.dataDir || 'FlexiDB');
+    this.filePath = path.join(this.dataDir, fileName);
+    this.autoBackupEnabled = false;
     if (this.autoBackupEnabled) {
-      this.autoBackupInterval = setInterval(() => this.autoBackup(), 60000); // Auto-backup every minute
+      this.autoBackupInterval = setInterval(() => this.autoBackup(), 60000);
     }
-    this.ready = this.init(); // Initialize the database automatically
+    this.ready = this.init();
   }
 
-  // Initialize the database (must be called before using)
   async init() {
-    await this.ensureDataDir(); // Create data folder if it doesn't exist
-    await this.loadData(); // Load data from file
+    await this.ensureDataDir();
+    await this.ensureFile();
   }
 
-  // Create the data folder if it doesn't exist
   async ensureDataDir() {
+    await fs.mkdir(this.dataDir, { recursive: true });
+  }
+
+  async ensureFile() {
+    const exists = await fs.access(this.filePath).then(() => true).catch(() => false);
+    if (!exists) await fs.writeFile(this.filePath, '{}', 'utf8');
+  }
+
+  async readData() {
+    const data = await fs.readFile(this.filePath, 'utf8');
     try {
-      await fs.mkdir(this.dataDir, { recursive: true }); // Create folder, including parent folders
-    } catch (error) {
-      throw new Error(`Failed to create data directory: ${error.message}`);
+      return JSON.parse(data);
+    } catch {
+      return {};
     }
   }
 
-  // Load data from the JSON file into memory
-  async loadData() {
-    try {
-      const exists = await fs.access(this.filePath).then(() => true).catch(() => false); // Check if file exists
-      if (!exists) {
-        await fs.writeFile(this.filePath, '{}', 'utf8'); // Create empty file if it doesn't exist
-      }
-      const data = await fs.readFile(this.filePath, 'utf8'); // Read file content
-      const json = JSON.parse(data); // Parse JSON
-      for (const [key, value] of Object.entries(json)) {
-        this.cache.set(key, value); // Load data into cache
-      }
-    } catch (error) {
-      throw new Error(`Failed to load database: ${error.message}`);
-    }
+  async writeData(data) {
+    await fs.writeFile(this.filePath, JSON.stringify(data, null, 2), 'utf8');
   }
 
-  // Save data from memory to the JSON file
-  async saveData() {
-    if (!this.isDirty) return; // Skip if no changes
-    try {
-      const data = Object.fromEntries(this.cache); // Convert cache to object
-      await fs.writeFile(this.filePath, JSON.stringify(data, null, 2), 'utf8'); // Write to file with formatting
-      this.isDirty = false; // Mark as saved
-    } catch (error) {
-      throw new Error(`Failed to save database: ${error.message}`);
-    }
-  }
-
-  // Set a key-value pair in the database
   async set(key, value) {
-    await this.ready; // Wait for initialization
-    if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    this.cache.set(key, value); // Store in cache
-    this.isDirty = true; // Mark as changed
-    await this.saveData(); // Save data immediately
-    return value; // Return the value
+    await this.ready;
+    if (!key) throw new TypeError('Key is not defined!');
+    const data = await this.readData();
+    data[key] = value;
+    await this.writeData(data);
+    return value;
   }
 
-  // Get the value for a key
   async get(key) {
-    await this.ready; // Wait for initialization
-    await this.loadData(); // Ensure data is loaded (if not already) ~_-
-    if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    return this.cache.get(key); // Return value from cache
+    await this.ready;
+    if (!key) throw new TypeError('Key is not defined!');
+    const data = await this.readData();
+    return data[key];
   }
 
-  // Check if a key exists
   async has(key) {
-    await this.ready; // Wait for initialization
-    await this.loadData(); // Ensure data is loaded (if not already) ~_-
-    if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    return this.cache.has(key); // Return true if key exists
+    await this.ready;
+    if (!key) throw new TypeError('Key is not defined!');
+    const data = await this.readData();
+    return Object.prototype.hasOwnProperty.call(data, key);
   }
 
-  // Delete a key from the database
   async delete(key) {
-    await this.ready; // Wait for initialization
-    if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    if (!this.cache.has(key)) return false; // Return false if key doesn't exist
-    const result = this.cache.delete(key); // Delete from cache
-    this.isDirty = true; // Mark as changed
-    await this.saveData(); // Save data immediately
-    return result; // Return true if deleted
+    await this.ready;
+    if (!key) throw new TypeError('Key is not defined!');
+    const data = await this.readData();
+    if (!Object.prototype.hasOwnProperty.call(data, key)) return false;
+    delete data[key];
+    await this.writeData(data);
+    return true;
   }
 
-  // Get all key-value pairs (with optional limit)
   async all(limit = 0) {
-    await this.ready; // Wait for initialization
-    const entries = Array.from(this.cache.entries()).map(([key, value]) => ({
-      data: key,
-      value
-    })); // Convert cache to array of objects
-    return limit > 0 ? entries.slice(0, limit) : entries; // Return limited or full list
+    await this.ready;
+    const data = await this.readData();
+    const entries = Object.entries(data).map(([k, v]) => ({ data: k, value: v }));
+    return limit > 0 ? entries.slice(0, limit) : entries;
   }
 
-  // Add a number to a key's value
   async add(key, value) {
-    await this.ready; // Wait for initialization
-    if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    if (isNaN(value)) throw new TypeError('Value must be a number!'); // Check for valid number
-    const current = Number(this.get(key) || 0); // Convert current value to number (default 0)
-    const newValue = current + value; // Add value
-    return this.set(key, newValue); // Save and return new value
+    await this.ready;
+    if (!key) throw new TypeError('Key is not defined!');
+    if (isNaN(value)) throw new TypeError('Value must be a number!');
+    const data = await this.readData();
+    const current = Number(data[key] || 0);
+    const newValue = current + value;
+    data[key] = newValue;
+    await this.writeData(data);
+    return newValue;
   }
 
-  // Subtract a number from a key's value
   async subtract(key, value) {
-    await this.ready; // Wait for initialization
-    if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    if (isNaN(value)) throw new TypeError('Value must be a number!'); // Check for valid number
-    const current = Number(this.get(key) || 0); // Convert current value to number (default 0)
-    if (!this.has(key) && current === 0) throw new TypeError('Key does not exist!'); // Check if key exists
-    const newValue = current - value; // Subtract value
-    return this.set(key, newValue); // Save and return new value
+    await this.ready;
+    if (!key) throw new TypeError('Key is not defined!');
+    if (isNaN(value)) throw new TypeError('Value must be a number!');
+    const data = await this.readData();
+    if (!Object.prototype.hasOwnProperty.call(data, key)) throw new TypeError('Key does not exist!');
+    const current = Number(data[key] || 0);
+    const newValue = current - value;
+    data[key] = newValue;
+    await this.writeData(data);
+    return newValue;
   }
 
-  // Perform a math operation on a key's value
   async math(key, operator, value) {
-    await this.ready; // Wait for initialization
-    if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    if (!operator) throw new TypeError('Operator is not defined!'); // Check for valid operator
-    if (isNaN(value)) throw new TypeError('Value must be a number!'); // Check for valid number
-    const current = Number(this.get(key) || 0); // Convert current value to number (default 0)
-    if (!this.has(key) && current === 0) throw new TypeError('Key does not exist!'); // Check if key exists
-    let newValue;
+    await this.ready;
+    if (!key) throw new TypeError('Key is not defined!');
+    if (!operator) throw new TypeError('Operator is not defined!');
+    if (isNaN(value)) throw new TypeError('Value must be a number!');
+    const data = await this.readData();
+    if (!Object.prototype.hasOwnProperty.call(data, key)) throw new TypeError('Key does not exist!');
+    const current = Number(data[key] || 0);
+    let result;
     switch (operator) {
-      case '+': newValue = current + value; break; // Addition
-      case '-': newValue = current - value; break; // Subtraction
-      case '*': newValue = current * value; break; // Multiplication
+      case '+': result = current + value; break;
+      case '-': result = current - value; break;
+      case '*': result = current * value; break;
       case '/':
-        if (value === 0) throw new TypeError('Cannot divide by zero!'); // Prevent division by zero
-        newValue = current / value; // Division
+        if (value === 0) throw new TypeError('Cannot divide by zero!');
+        result = current / value;
         break;
-      case '%': newValue = current % value; break; // Modulus
-      default: throw new TypeError('Invalid operator!'); // Invalid operator
+      case '%': result = current % value; break;
+      default: throw new TypeError('Invalid operator!');
     }
-    return this.set(key, newValue); // Save and return new value
+    data[key] = result;
+    await this.writeData(data);
+    return result;
   }
 
-  // Add a value to an array at a key
   async push(key, value) {
-    await this.ready; // Wait for initialization
-    if (!key) throw new TypeError('Key is not defined!'); // Check for valid key
-    const current = await this.get(key) || []; // Get array or empty array
-    if (!Array.isArray(current)) throw new TypeError('Value at key is not an array!'); // Check if array
-    current.push(value); // Add value to array
-    return this.set(key, current); // Save and return array
+    await this.ready;
+    if (!key) throw new TypeError('Key is not defined!');
+    const data = await this.readData();
+    const arr = Array.isArray(data[key]) ? data[key] : [];
+    arr.push(value);
+    data[key] = arr;
+    await this.writeData(data);
+    return arr;
   }
 
-  // Create a backup of the database
   async backup(fileName) {
-    await this.ready; // Wait for initialization
-    if (!fileName) throw new TypeError('Filename is not defined!'); // Check for valid filename
-    try {
-      const backupPath = path.join(this.dataDir, `${fileName}.json`); // Path for backup file
-      const data = Object.fromEntries(this.cache); // Convert cache to object
-      await fs.writeFile(backupPath, JSON.stringify(data, null, 2), 'utf8'); // Write backup file
-      return true; // Return success
-    } catch (error) {
-      throw new Error(`Failed to create backup: ${error.message}`);
-    }
+    await this.ready;
+    if (!fileName) throw new TypeError('Filename is not defined!');
+    const backupPath = path.join(this.dataDir, `${fileName}.json`);
+    const data = await this.readData();
+    await fs.writeFile(backupPath, JSON.stringify(data, null, 2), 'utf8');
+    return true;
   }
 
-  // Create an automatic backup
   async autoBackup() {
-    if (!this.autoBackupEnabled) return; // Skip if auto-backup is disabled
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); // Create timestamp
-    await this.backup(`backup-${timestamp}`); // Save backup with timestamp
+    if (!this.autoBackupEnabled) return;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    await this.backup(`backup-${timestamp}`);
   }
 
-  // Clear all data in the database
   async reset() {
-    await this.ready; // Wait for initialization
-    this.cache.clear(); // Clear cache
-    this.isDirty = true; // Mark as changed
-    await this.saveDataDebounced(); // Save data after delay
+    await this.ready;
+    await this.writeData({});
   }
 
-  // Close the database and save data
   async destroy() {
-    await this.ready; // Wait for initialization
-    if (this.autoBackupEnabled) {
-      clearInterval(this.autoBackupInterval); // Stop auto-backup
-    }
-    await this.saveData(); // Save data immediately
+    await this.ready;
+    if (this.autoBackupEnabled) clearInterval(this.autoBackupInterval);
   }
 
-  // Run multiple operations as a single transaction
   async transaction(operations) {
-    await this.ready; // Wait for initialization
-    const backup = new Map(this.cache); // Backup current cache
+    await this.ready;
+    const original = await this.readData();
+    const data = { ...original };
     try {
       for (const op of operations) {
-        if (op.type === 'set') await this.set(op.key, op.value); // Set operation
-        else if (op.type === 'delete') await this.delete(op.key); // Delete operation
-        else if (op.type === 'add') await this.add(op.key, op.value); // Add operation
-        else if (op.type === 'subtract') await this.subtract(op.key, op.value); // Subtract operation
-        else if (op.type === 'push') await this.push(op.key, op.value); // Push operation
-        else if (op.type === 'math') await this.math(op.key, op.operator, op.value); // Math operation
+        if (op.type === 'set') data[op.key] = op.value;
+        else if (op.type === 'delete') delete data[op.key];
+        else if (op.type === 'add') data[op.key] = Number(data[op.key] || 0) + op.value;
+        else if (op.type === 'subtract') data[op.key] = Number(data[op.key] || 0) - op.value;
+        else if (op.type === 'push') {
+          const arr = Array.isArray(data[op.key]) ? data[op.key] : [];
+          arr.push(op.value);
+          data[op.key] = arr;
+        }
       }
-    } catch (error) {
-      this.cache = backup; // Restore cache if transaction fails
-      throw new Error(`Transaction failed: ${error.message}`);
+      await this.writeData(data);
+    } catch (err) {
+      await this.writeData(original);
+      throw new Error(`Transaction failed: ${err.message}`);
     }
   }
 }
 
-module.exports = FlexiDB; // Export the FlexiDB class
+module.exports = FlexiDB;

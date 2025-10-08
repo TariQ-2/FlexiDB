@@ -1,7 +1,7 @@
 {
   "name": "flexi-db",
-  "version": "1.0.6",
-  "description": "A lightweight, flexible JSON-based database with caching, async operations, and customizable data storage.",
+  "version": "1.1.0",
+  "description": "A lightweight, flexible JSON-based database.",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -11,7 +11,6 @@
     "json",
     "lightweight",
     "flexi",
-    "cache",
     "async",
     "nosql",
     "file-based",
@@ -23,7 +22,6 @@
     "json-db",
     "disk-db",
     "backup",
-    "in-memory",
     "transaction"
   ],
   "author": "TariQ",

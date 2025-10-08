@@ -1,11 +1,11 @@
 # FlexiDB
 [![GitHub](https://img.shields.io/github/license/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB/blob/master/LICENSE) [![GitHub last commit](https://img.shields.io/github/last-commit/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB/commits/master) [![GitHub issues](https://img.shields.io/github/issues-raw/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB/issues) [![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB/issues) [![GitHub repo size](https://img.shields.io/github/repo-size/TariQ-2/FlexiDB)](https://github.com/TariQ-2/FlexiDB) [![npm downloads](https://img.shields.io/npm/dt/flexi-db.svg?maxAge=3600)](https://github.com/TariQ-2/FlexiDB) [![npm version](https://img.shields.io/npm/v/flexi-db.svg?maxAge=3600)](https://github.com/TariQ-2/FlexiDB) ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=TariQ-2/FlexiDB)
 
-**FlexiDB** is a lightweight, flexible JSON-based database for Node.js projects. It offers in-memory caching, async operations, atomic transactions, and zero dependencies.
+**FlexiDB** is a lightweight, flexible JSON-based database for Node.js projects. It offers async operations, atomic transactions, and zero dependencies, with direct file-based storage.
 
 ## Features
 
-* **High Performance** – In-memory caching and debounced disk writes
+* **File-Based Storage** – All operations are performed directly on disk
 * **Async API** – All methods are promise-based
 * **Custom Storage** – Use any directory for data and backups
 * **Auto Backups** – Optional periodic file backups
